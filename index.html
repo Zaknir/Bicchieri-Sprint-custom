@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estrattore Ordine Oggetti</title>
     <style>
-        /* Stili generali del corpo pagina: centra tutto verticalmente e orizzontalmente */
+        /* Struttura e centratura */
         body {
             font-family: 'Arial', sans-serif;
             display: flex;
@@ -18,7 +18,6 @@
             color: #333;
         }
 
-        /* Contenitore principale bianco con ombra per effetto scheda */
         #container {
             background-color: #fff;
             padding: 30px;
@@ -34,7 +33,7 @@
             margin-bottom: 20px;
         }
 
-        /* Griglia per disporre i 4 campi di input su due colonne */
+        /* Griglia input */
         .input-group {
             margin-bottom: 20px;
             display: grid;
@@ -42,15 +41,16 @@
             gap: 10px;
         }
 
-        /* Stile estetico dei campi di testo */
+        /* Stile input */
         input {
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 4px;
             text-align: center;
+            font-size: 1em;
         }
 
-        /* Pulsante di azione principale */
+        /* Pulsante estrazione */
         button {
             padding: 15px 30px;
             font-size: 1.2em;
@@ -59,25 +59,20 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s;
-            margin-bottom: 25px;
             width: 100%;
+            margin-bottom: 25px;
         }
 
-        button:hover { background-color: #0056b3; }
         button:active { transform: scale(0.98); }
 
-        /* Box dove appare il testo estratto */
+        /* Box risultato */
         #risultato {
             margin-top: 20px;
             font-size: 1.3em;
             font-weight: bold;
-            text-align: center;
             padding: 20px;
             border: 2px solid #007bff;
             border-radius: 8px;
-            background-color: #fff;
-            color: #333;
             min-height: 60px;
             display: flex;
             align-items: center;
@@ -91,33 +86,37 @@
         <h1>Ordine Oggetti</h1>
         
         <div class="input-group">
-            <input type="text" id="obj1" placeholder="Oggetto 1" value="Mela">
-            <input type="text" id="obj2" placeholder="Oggetto 2" value="Libro">
-            <input type="text" id="obj3" placeholder="Oggetto 3" value="Chiave">
-            <input type="text" id="obj4" placeholder="Oggetto 4" value="Palla">
+            <input type="text" class="input-oggetto" id="obj1" placeholder="Oggetto 1" value="Mela">
+            <input type="text" class="input-oggetto" id="obj2" placeholder="Oggetto 2" value="Libro">
+            <input type="text" class="input-oggetto" id="obj3" placeholder="Oggetto 3" value="Chiave">
+            <input type="text" class="input-oggetto" id="obj4" placeholder="Oggetto 4" value="Palla">
         </div>
 
         <button id="estraiCarta">Estrai Ordine</button>
 
         <div id="risultato" role="alert" aria-live="polite">
-            Inserisci i nomi e clicca per estrarre.
+            Clicca per estrarre.
         </div>
     </div>
 
     <script>
-        // Definizioni fisse per le direzioni
         const direzioni = ["da Sinistra a Destra", "da Destra a Sinistra", "dall'Alto in Basso", "dal Basso in Alto"];
-        
-        // Memoria interna per evitare che escano le stesse sequenze troppo spesso
         const storicoCombinazioni = [];
         const MAX_STORICO = 5;
 
-        const risultatoDiv = document.getElementById('risultato');
-        const estraiButton = document.getElementById('estraiCarta');
+        // Gestione Focus: seleziona tutto il testo al click
+        document.querySelectorAll('.input-oggetto').forEach(input => {
+            input.addEventListener('focus', function() {
+                // Seleziona tutto il contenuto per cancellazione rapida
+                this.select();
+            });
+            
+            input.addEventListener('mouseup', function(e) {
+                // Impedisce al click di deselezionare subito il testo su alcuni browser
+                e.preventDefault();
+            });
+        });
 
-        /**
-         * Algoritmo Fisher-Yates per rimescolare l'array in modo casuale
-         */
         function mischiaArray(array) {
             let arrayCopiato = [...array]; 
             let currentIndex = arrayCopiato.length, randomIndex;
@@ -130,11 +129,7 @@
             return arrayCopiato;
         }
 
-        /**
-         * Funzione invocata al click del pulsante: legge gli input ed estrae
-         */
         function estraiCarta() {
-            // Legge i nomi inseriti dall'utente, usa un valore di default se vuoti
             const oggetti = [
                 document.getElementById('obj1').value.trim() || "Oggetto 1",
                 document.getElementById('obj2').value.trim() || "Oggetto 2",
@@ -143,16 +138,11 @@
             ];
 
             let combinazioneValida = false;
-            let direzioneCasuale;
-            let ordineCasualeOggetti;
-            let combinazioneChiave;
+            let direzioneCasuale, ordineCasualeOggetti, combinazioneChiave;
 
-            // Continua a provare finché non trova una combinazione non presente nello storico recente
             while (!combinazioneValida) {
                 direzioneCasuale = direzioni[Math.floor(Math.random() * direzioni.length)];
                 ordineCasualeOggetti = mischiaArray(oggetti);
-                
-                // Crea una stringa univoca per rappresentare questa specifica estrazione
                 combinazioneChiave = direzioneCasuale + "|" + ordineCasualeOggetti.join(',');
 
                 if (!storicoCombinazioni.includes(combinazioneChiave)) {
@@ -160,19 +150,13 @@
                 }
             }
 
-            // Gestione della memoria dello storico (rimuove la più vecchia se supera il limite)
             storicoCombinazioni.unshift(combinazioneChiave);
-            if (storicoCombinazioni.length > MAX_STORICO) {
-                storicoCombinazioni.pop(); 
-            }
+            if (storicoCombinazioni.length > MAX_STORICO) { storicoCombinazioni.pop(); }
 
-            // Formatta e stampa il risultato finale a video
-            const testoOggetti = ordineCasualeOggetti.join(', '); 
-            risultatoDiv.textContent = `${direzioneCasuale}: ${testoOggetti}.`;
+            document.getElementById('risultato').textContent = `${direzioneCasuale}: ${ordineCasualeOggetti.join(', ')}.`;
         }
 
-        // Collega l'evento click alla funzione di estrazione
-        estraiButton.addEventListener('click', estraiCarta);
+        document.getElementById('estraiCarta').addEventListener('click', estraiCarta);
     </script>
 </body>
 </html>
