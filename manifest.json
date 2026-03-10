@@ -1,0 +1,20 @@
+{
+  "short_name": "Estrattore",
+  "name": "Estrattore Ordine Oggetti",
+  "icons": [
+    {
+      "src": "icona-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icona-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#007bff",
+  "background_color": "#f4f4f9"
+}
