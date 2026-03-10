@@ -1,5 +1,5 @@
 const CONFIG = {
-    DIREZIONI: ["da Sinistra a Destra", "da Destra a Sinistra", "dall'Alto in Basso", "dal Basso in Alto"],
+    DIREZIONI: ["Da SINISTRA a DESTRA", "Da DESTRA a SINISTRA", "Dall'ALTO al BASSO", "Dal BASSO all'ALTO"],
     MAX_STORICO: 5
 };
 
