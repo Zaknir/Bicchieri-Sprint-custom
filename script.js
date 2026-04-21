@@ -28,14 +28,14 @@ function shuffle(array) {
  * Gestione estrazione
  */
 function handleExtraction() {
-    // 1. Recupera valori dinamicamente
+    // 1. Recupera i valori dai 5 input
     const oggetti = Array.from(inputs).map(i => i.value.trim() || "Vuoto");
     
     let combinazioneChiave;
     let direzioneScelta;
     let ordineScelto;
 
-    // 2. Calcola combinazione univoca (con limite tentativi per sicurezza)
+    // 2. Calcola combinazione univoca
     let tentativi = 0;
     do {
         direzioneScelta = CONFIG.DIREZIONI[Math.floor(Math.random() * CONFIG.DIREZIONI.length)];
@@ -44,11 +44,11 @@ function handleExtraction() {
         tentativi++;
     } while (state.storico.includes(combinazioneChiave) && tentativi < 20);
 
-    // 3. Aggiorna stato
+    // 3. Aggiorna stato storico
     state.storico.unshift(combinazioneChiave);
     if (state.storico.length > CONFIG.MAX_STORICO) state.storico.pop();
 
-    // 4. Update UI
+    // 4. Aggiorna Interfaccia Utente
     displayRisultato.textContent = `${direzioneScelta}: ${ordineScelto.join(', ')}.`;
 }
 
@@ -59,7 +59,9 @@ inputs.forEach(input => {
 
 btnEstrai.addEventListener('click', handleExtraction);
 
+// Registrazione Service Worker per PWA
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js')
-    .then(() => console.log("Service Worker Registrato"));
+    .then(() => console.log("Service Worker Registrato"))
+    .catch(err => console.log("Errore SW:", err));
 }
