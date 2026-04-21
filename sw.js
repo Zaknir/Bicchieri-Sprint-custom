@@ -1,24 +1,45 @@
-const CACHE_NAME = 'estrattore-v2';
-const ASSETS = [
+const CACHE_NAME = 'bicchieri-sprint-v2.0'; // Incrementa questo numero (es. v2.1) ogni volta che modifichi CSS o JS
+const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './script.js',
   './manifest.json',
-  './icona-192.png',
-  './icona-512.png'
+  './icona-192.png'
 ];
 
-// Installa il Service Worker e salva i file in cache
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+// 1. Installazione: Scarica i file e forza l'attivazione immediata
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
   );
+  self.skipWaiting(); 
 });
 
-// Gestisce le richieste: se non c'è rete, usa la cache
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((response) => response || fetch(e.request))
+// 2. Attivazione: Pulisce le vecchie cache e prende il controllo della pagina
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('Eliminazione vecchia cache:', cache);
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+// 3. Fetch: Serve i file dalla cache (Offline First) ma permette l'aggiornamento
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
   );
 });
